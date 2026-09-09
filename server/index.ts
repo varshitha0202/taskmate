@@ -138,11 +138,11 @@ app.post('/api/auth/register', async (req, res) => {
         },
       });
 
-      if (authError || !authUser?.id) {
+      if (authError || !authUser?.user?.id) {
         throw authError || new Error('Failed to create Supabase Auth user');
       }
 
-      const id = authUser.id;
+      const id = authUser.user.id;
       const userLat = latitude || 17.4435;
       const userLng = longitude || 78.3772;
 
