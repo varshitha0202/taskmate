@@ -1,0 +1,9 @@
+node_modules/
+.env
+.env.*
+!.env.example
+!.env.production.example
+dist/
+taskmate.db
+taskmate.db-shm
+taskmate.db-wal

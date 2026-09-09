@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --tm-ink: #18314f;
+    --tm-muted: #6f8299;
+    --tm-primary: #0b7285;
+    --tm-primary-dark: #075a69;
+    --tm-secondary: #2f6f9f;
+    --tm-warm: #f3a44d;
+    --tm-coral: #e87861;
+    --tm-surface: #ffffff;
+    --tm-canvas: #f4f7f6;
+    --tm-line: #dfe8e6;
+    color: var(--tm-ink);
+    background: var(--tm-canvas);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    background: var(--tm-canvas);
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    background: var(--tm-canvas);
+    color: var(--tm-ink);
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+}
+
+@layer components {
+  .tm-page {
+    width: min(100% - 2rem, 1180px);
+    margin-inline: auto;
+    padding-block: 2rem 5rem;
+  }
+
+  .tm-card {
+    border: 1px solid var(--tm-line);
+    border-radius: 1.5rem;
+    background: var(--tm-surface);
+    box-shadow: 0 10px 28px rgba(24, 49, 79, 0.055);
+  }
+
+  .tm-eyebrow {
+    color: var(--tm-primary);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+
+  .tm-gradient-panel {
+    background: linear-gradient(125deg, #0b7285 0%, #145c78 54%, #18314f 100%);
+  }
+
+  .tm-section-title {
+    color: #18314f;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .tm-muted {
+    color: #6f8299;
+  }
+
+  @media (max-width: 640px) {
+    .tm-page {
+      width: min(100% - 1.25rem, 1180px);
+      padding-block: 1.25rem 6rem;
+    }
+
+    .customer-nav {
+      position: fixed;
+      right: 0.75rem;
+      bottom: 0.75rem;
+      left: 0.75rem;
+      top: auto;
+      justify-content: space-between;
+      margin: 0;
+      padding: 0.5rem;
+      border-radius: 1.25rem;
+      box-shadow: 0 14px 35px rgba(24, 49, 79, 0.18);
+    }
+
+    .customer-nav button {
+      min-width: 0;
+      flex: 1;
+      flex-direction: column;
+      gap: 0.15rem;
+      padding: 0.5rem 0.35rem;
+      font-size: 0.68rem;
+    }
+  }
+}
+
+/* Keep the existing utility-based screens on the same product palette. */
+.bg-indigo-600 { background-color: var(--tm-primary) !important; }
+.bg-indigo-700, .bg-indigo-800 { background-color: var(--tm-primary-dark) !important; }
+.bg-indigo-900, .bg-indigo-950 { background-color: var(--tm-ink) !important; }
+.text-indigo-600, .text-indigo-700, .text-indigo-800 { color: var(--tm-primary) !important; }
+.text-indigo-900, .text-indigo-950 { color: var(--tm-ink) !important; }
+.bg-indigo-50 { background-color: #e9f5f3 !important; }
+.border-indigo-200, .border-indigo-300 { border-color: #b6ddd7 !important; }
+.bg-purple-500, .bg-purple-600 { background-color: var(--tm-coral) !important; }
+.text-purple-600, .text-purple-700 { color: #c95e4c !important; }
+.bg-purple-50, .bg-purple-100 { background-color: #fff0eb !important; }
+.border-purple-200 { border-color: #f3c3b8 !important; }
+.shadow-indigo-200, .shadow-indigo-300 { --tw-shadow-color: rgba(11, 114, 133, 0.2) !important; }
+
+/* Legacy gradient utilities now resolve to the brand colour instead of purple. */
+.from-indigo-500, .from-indigo-600, .from-indigo-700, .from-indigo-800, .from-indigo-900, .from-indigo-950 {
+  --tw-gradient-from: var(--tm-primary) var(--tw-gradient-from-position) !important;
+}
+.via-indigo-500, .via-indigo-600, .via-indigo-700, .via-indigo-800, .via-indigo-900 {
+  --tw-gradient-to: rgb(20 92 120 / 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), #145c78 var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
+}
+.to-indigo-700, .to-indigo-800, .to-indigo-900 { --tw-gradient-to: var(--tm-primary-dark) var(--tw-gradient-to-position) !important; }
+
+/* Custom animations & scrollbar polish */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(79, 70, 229, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Glassmorphism helpers */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
