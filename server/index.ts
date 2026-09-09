@@ -51,6 +51,9 @@ const isProduction = process.env.NODE_ENV === 'production';
 const app = express();
 const server = http.createServer(app);
 const HOST = process.env.HOST || '0.0.0.0';
+app.get('/api/health', (_req,res) =>{
+res.json({ status:'ok' });
+});
 const PORT = Number(process.env.PORT || 3001);
 
 const JWT_SECRET = process.env.JWT_SECRET || (isProduction ? undefined : 'taskmate-super-secret-jwt-key-2026');
