@@ -58,8 +58,6 @@ export function normalizeSupabaseProfile(user: any) {
   const { password_hash, passwordHash, ...safeUser } = user;
   return {
     ...safeUser,
-    is_identity_verified: safeUser.is_identity_verified ?? 1,
-    is_phone_verified: safeUser.is_phone_verified ?? 1,
     vehicle_type: safeUser.vehicle_type ?? 'Motorcycle',
     completion_rate: safeUser.completion_rate ?? 0.98,
     response_rate: safeUser.response_rate ?? 0.95,

@@ -122,13 +122,27 @@ app.post('/api/auth/register', async (req, res) => {
     }
 
     if (hasSupabaseConfig && supabaseAdmin) {
-      const { data: existing } = await getSupabaseUserByEmail(email);
+      const emailLower = String(email).trim().toLowerCase();
+      const { data: existing } = await getSupabaseUserByEmail(emailLower);
       if (existing) {
         return res.status(400).json({ error: 'Email already registered' });
       }
 
-      const id = uuidv4();
-      const password_hash = bcrypt.hashSync(password, 10);
+      const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email: emailLower,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          name,
+          role,
+        },
+      });
+
+      if (authError || !authUser?.id) {
+        throw authError || new Error('Failed to create Supabase Auth user');
+      }
+
+      const id = authUser.id;
       const userLat = latitude || 17.4435;
       const userLng = longitude || 78.3772;
 
@@ -137,21 +151,20 @@ app.post('/api/auth/register', async (req, res) => {
         .insert({
           id,
           name,
-          email: String(email).trim().toLowerCase(),
-          password_hash,
+          email: emailLower,
           role,
           phone: phone || '',
           address: address || '',
           latitude: userLat,
           longitude: userLng,
-          vehicle_type: vehicle_type || 'Motorcycle',
-          is_identity_verified: true,
-          is_phone_verified: true,
         })
         .select('*')
         .single();
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        await supabaseAdmin.auth.admin.deleteUser(id).catch(() => undefined);
+        throw insertError;
+      }
 
       const token = jwt.sign({ id, email: createdUser.email, role: createdUser.role }, JWT_SECRET, { expiresIn: '7d' });
       if (role === 'AGENT') retryPendingTasks();
@@ -196,13 +209,18 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     if (hasSupabaseConfig && supabaseAdmin) {
-      const { data: user, error: userError } = await getSupabaseUserByEmail(email);
-      if (userError || !user) {
+      const emailLower = String(email).trim().toLowerCase();
+      const { data: authData, error: authError } = await supabaseAdmin.auth.signInWithPassword({
+        email: emailLower,
+        password,
+      });
+
+      if (authError || !authData?.user) {
         return res.status(401).json({ error: 'Invalid email or password' });
       }
 
-      const isValid = bcrypt.compareSync(password, user.password_hash || '');
-      if (!isValid) {
+      const { data: user, error: userError } = await getSupabaseUserById(authData.user.id);
+      if (userError || !user) {
         return res.status(401).json({ error: 'Invalid email or password' });
       }
 
