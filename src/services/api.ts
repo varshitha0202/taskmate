@@ -4,6 +4,8 @@ const configuredApiBase = (import.meta.env.VITE_API_BASE_URL || '').trim().repla
 const browserOrigin = typeof window !== 'undefined' ? window.location.origin : '';
 const API_BASE = configuredApiBase ? `${configuredApiBase}/api` : (browserOrigin ? `${browserOrigin}/api` : '/api');
 
+console.log('🔗 API Base URL configured:', API_BASE);
+
 function getAuthHeader(): Record<string, string> {
   const token = localStorage.getItem('taskmate_token');
   return token ? { Authorization: `Bearer ${token}` } : {};
@@ -11,33 +13,54 @@ function getAuthHeader(): Record<string, string> {
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(errorData.error || `HTTP error ${res.status}`);
+    let errorData: any;
+    try {
+      errorData = await res.json();
+    } catch {
+      errorData = { error: res.statusText };
+    }
+    
+    const errorMsg = errorData.error || `HTTP error ${res.status}`;
+    console.error(`❌ API Error [${res.status}]:`, errorMsg, errorData);
+    throw new Error(errorMsg);
   }
-  return res.json();
+  
+  try {
+    return await res.json();
+  } catch (err) {
+    console.error('❌ Failed to parse response JSON:', err);
+    throw new Error('Invalid response format from server');
+  }
 }
 
 export const api = {
   // Auth
   async login(email: string, password: string): Promise<{ token: string; user: Profile }> {
+    console.log('📝 Attempting login:', email);
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    return handleResponse(res);
+    const result = await handleResponse<{ token: string; user: Profile }>(res);
+    console.log('✅ Login successful for:', email);
+    return result;
   },
 
   async register(data: any): Promise<{ token: string; user: Profile }> {
+    console.log('📝 Attempting registration:', data.email);
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    return handleResponse(res);
+    const result = await handleResponse<{ token: string; user: Profile }>(res);
+    console.log('✅ Registration successful for:', data.email);
+    return result;
   },
 
   async getMe(): Promise<{ user: Profile }> {
+    console.log('🔍 Fetching user profile...');
     const res = await fetch(`${API_BASE}/auth/me`, {
       headers: { ...getAuthHeader() },
     });
@@ -130,7 +153,7 @@ export const api = {
   },
 
   // Agent Actions
-  async getActiveOffer(): Promise<{ offer: (TaskAssignment & { title: string; description: string; budget: number; category: string; pickup_location: string; customer_name: string; customer_rating?: number }) | null }> {
+  async getActiveOffer(): Promise<{ offer: (TaskAssignment & { title: string; description: string; budget: number; category: string; pickup_location: string; customer_name: string; customer_rating: number }) | null }> {
     const res = await fetch(`${API_BASE}/agent/active-offer`, {
       headers: { ...getAuthHeader() },
     });
